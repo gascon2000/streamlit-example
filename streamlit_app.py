@@ -1,40 +1,60 @@
-import altair as alt
-import numpy as np
 import pandas as pd
 import streamlit as st
+from PIL import Image
+import base64
+import io
+import os
 
-"""
-# Welcome to Streamlit!
+# Vykreslení tabulky s logy
+st.markdown("<h1 style='text-align: center;'>Žebříček největších společností světa</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; font-size: 20px;'>Podle tržní kapitalizace v miliardách dolarů </p>", unsafe_allow_html=True)
+st.write("")
 
-Edit `/streamlit_app.py` to customize this app to your heart's desire :heart:.
-If you have any questions, checkout our [documentation](https://docs.streamlit.io) and [community
-forums](https://discuss.streamlit.io).
+# Load the data
+@st.cache_data
+def load_data():
+    df = pd.read_csv("final.csv")
+    return df
 
-In the meantime, below is an example of what you can do with just a few lines of code:
-"""
+data = load_data().copy()
 
-num_points = st.slider("Number of points in spiral", 1, 10000, 1100)
-num_turns = st.slider("Number of turns in spiral", 1, 300, 31)
+# Convert image to Base64
+def image_to_base64(img_path, output_size=(64, 64)):
+    # Check if the image path exists
+    if os.path.exists(img_path):
+        with Image.open(img_path) as img:
+            img = img.resize(output_size)
+            buffered = io.BytesIO()
+            img.save(buffered, format="PNG")
+            return f"data:image/png;base64,{base64.b64encode(buffered.getvalue()).decode()}"
+    return ""
 
-indices = np.linspace(0, 1, num_points)
-theta = 2 * np.pi * num_turns * indices
-radius = indices
+# If 'Logo' column doesn't exist, create one with path to the logos
+if 'Logo' not in data.columns:
+    output_dir = 'downloaded_logos'
+    data['Logo'] = data['Name'].apply(lambda name: os.path.join(output_dir, f'{name}.png'))
 
-x = radius * np.cos(theta)
-y = radius * np.sin(theta)
+# Convert image paths to Base64
+data["Logo"] = data["Logo"].apply(image_to_base64)
 
-df = pd.DataFrame({
-    "x": x,
-    "y": y,
-    "idx": indices,
-    "rand": np.random.randn(num_points),
-})
+nazev_column = st.column_config.TextColumn(label="Název společnosti")
+market_cap_column = st.column_config.TextColumn(label="Tržní kapitalizace 💬",help="📍**v mld. USD**")
+price_column = st.column_config.TextColumn(label="Cena za 1 akcii 💬", help="📍**Uzavírací cena za předchozí den (v USD)**")
 
-st.altair_chart(alt.Chart(df, height=700, width=700)
-    .mark_point(filled=True)
-    .encode(
-        x=alt.X("x", axis=None),
-        y=alt.Y("y", axis=None),
-        color=alt.Color("idx", legend=None, scale=alt.Scale()),
-        size=alt.Size("rand", legend=None, scale=alt.Scale(range=[1, 150])),
-    ))
+# Adjust the index to start from 1 and display only the first 25 companies
+data.reset_index(drop=True, inplace=True)
+data = data.head(25)
+data.index = data.index + 1
+
+data = data[['Name', 'Market Cap', 'Price']]
+
+
+# Display the dataframe
+st.dataframe(data, height=913, column_config={"Name":nazev_column,'Market Cap':market_cap_column,'Price':price_column})
+
+import datetime
+
+# Získání aktuálního data
+dnesni_datum = datetime.date.today().strftime("%d.%m.%Y")  # Formátování data na formát DD.MM.YYYY
+
+st.markdown(f'<span style="font-size: 14px">**Zdroj:** companiesmarketcap.com | **Data:** k {dnesni_datum} | **Autor:** lig </span>', unsafe_allow_html=True)
