@@ -1,9 +1,5 @@
 import pandas as pd
 import streamlit as st
-from PIL import Image
-import base64
-import io
-import os
 
 st.markdown("<h1 style='text-align: center;'>PandaQ</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; font-size: 20px;'>Josep Gascon</p>", unsafe_allow_html=True)
@@ -35,7 +31,7 @@ def load_data():
 data = load_data().copy()
 
 
-nazev_column = st.column_config.TextColumn(label="Název společnosti")
+nazev_column = st.column_config.TextColumn(label="Název společnti")
 market_cap_column = st.column_config.TextColumn(label="Tržní kapitalizace 💬",help="📍**v mld. USD**")
 price_column = st.column_config.TextColumn(label="Cena za 1 akcii 💬", help="📍**Uzavírací cena za předchozí den (v USD)**")
 
