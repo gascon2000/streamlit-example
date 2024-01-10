@@ -27,13 +27,11 @@ selected = st.text_input("", "Search...")
 button_clicked = st.button("OK")
 
 
-
 # Load the data
 @st.cache_data
 def load_data():
     df = pd.read_csv("final.csv")
     return df
-
 data = load_data().copy()
 
 
@@ -45,8 +43,10 @@ price_column = st.column_config.TextColumn(label="Cena za 1 akcii ðŸ’¬", help="ð
 data.reset_index(drop=True, inplace=True)
 data = data.head(25)
 data.index = data.index + 1
-
 data = data[['Name', 'Market Cap', 'Price']]
+
+# Display the dataframe
+st.dataframe(data, height=913, column_config={"Name":nazev_column,'Market Cap':market_cap_column,'Price':price_column})
 
 
 
