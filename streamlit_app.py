@@ -19,8 +19,8 @@ local_css("style.css")
 remote_css('https://fonts.googleapis.com/icon?family=Material+Icons')
 
 icon("search")
-selected = st.text_input("", "")
-button_clicked = st.button("Submit")
+selected = st.text_input("", "Search...")
+button_clicked = st.button("OK")
 
 
 # Load the data
